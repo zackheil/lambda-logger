@@ -1,14 +1,17 @@
 {
-  "name": "logger",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@zheil/lambda-logger",
+  "version": "0.0.1",
+  "description": "A versatile logger class for NodeJS Lambda functions in AWS",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zackheil/lambda-logger.git"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf dist && npx tsc"
   },
   "author": "Zachary Heil",
   "license": "ISC",
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^14.0.27",
     "typescript": "^3.9.7"
