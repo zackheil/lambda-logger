@@ -108,10 +108,12 @@ export default class Logger implements LoggerStructure {
         let packagedStack = [];
         const stack = new Error().stack?.split("\n");
 
-        const nodeRe = /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
+        // Help for this part came in part from the following code from errwischt
+        // https://github.com/errwischt/stacktrace-parser/blob/master/src/stack-trace-parser.js
+        const exp = /^\s*at (?:((?:\[object object\])?[^\\/]+(?: \[as \S+\])?) )?\(?(.*?):(\d+)(?::(\d+))?\)?\s*$/i;
         if(stack) {
             for(const line of stack) {
-                const parts = nodeRe.exec(line);
+                const parts = exp.exec(line);
                 if(parts) {
                     packagedStack.unshift({
                         file: parts[2],
