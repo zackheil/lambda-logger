@@ -1,5 +1,5 @@
 {
-  "name": "@zheil/lambda-logger",
+  "name": "@zackheil/lambda-logger",
   "version": "0.0.1",
   "description": "A versatile logger class for NodeJS Lambda functions in AWS",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:zackheil/lambda-logger.git"
+    "url": "git://github.com:zackheil/lambda-logger.git"
   },
   "publishConfig": {
     "registry":"https://npm.pkg.github.com/"
