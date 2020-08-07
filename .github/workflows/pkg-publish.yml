@@ -7,6 +7,8 @@ jobs:
   create-version:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
     - name: Automated releases for npm packages.
       uses: mikeal/merge-release@v4.0.7     
   build:
