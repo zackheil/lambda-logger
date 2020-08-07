@@ -10,14 +10,9 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v2
     - name: Automated releases for npm packages.
-      uses: mikeal/merge-release@v4.0.7     
-  build:
-    needs: [create-version]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    # Setup .npmrc file to publish to GitHub Packages
-    - uses: actions/setup-node@v1
+      uses: mikeal/merge-release@v4.0.7
+    - name: Publish NPM package
+      uses: actions/setup-node@v1
       with:
         node-version: '12.x'
         registry-url: 'https://npm.pkg.github.com'
