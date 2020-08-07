@@ -4,7 +4,13 @@ on:
       - master
 name: Deploy master branch
 jobs:
+  create-version:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Automated releases for npm packages.
+      uses: mikeal/merge-release@v4.0.7     
   build:
+    needs: [create-version]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
