@@ -1,0 +1,92 @@
+name: Deploy NPM Package
+
+on:
+  pull_request:
+    types: [closed]
+    branches: master
+    paths:
+    - '**.ts'
+    - '**.js'
+    - '**.json'
+
+jobs:
+  verify-build:
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    name: Verify NPM Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+    steps:
+    # Checkout the code
+    - name: Checkout Branch
+      uses: actions/checkout@v2
+    - name: Install Dependencies for Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install
+    - name: Build Package
+      run: npm run build --if-present
+
+  create-version:
+    name: Create and Release Package Version
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    needs: verify-build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Branch
+      uses: actions/checkout@v2
+
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+        registry-url: 'https://npm.pkg.github.com'
+        scope: 'zackheil'
+      
+    - name: Check NPM Version Decider
+      run: echo ${{ github.event.head_commit.message }}
+
+    - name: Adjust Version
+      shell: bash
+      env:
+        MAJOR_FILTER: "Major:"
+        MINOR_FILTER: "Feature:"
+        PATCH_FILTER: "Bugfix:"
+      run: | 
+        readonly local last_commit_log=$(git log -1 --pretty=format:"%s")
+        echo "last commit log: $last_commit_log"
+        readonly local major_count=$(echo "$last_commit_log" | grep -c "$MAJOR_FILTER" )
+        readonly local minor_count=$(echo "$last_commit_log" | grep -c "$MINOR_FILTER" )
+        readonly local patch_count=$(echo "$last_commit_log" | grep -c "$PATCH_FILTER" )
+        echo "number of occurences in '$last_commit_log': M: $major_count m: $minor_count p: $patch_count"
+        if [[ "$major_count" -ne 0 ]]; then
+          echo setting major version + 1
+          echo $(npm --no-git-tag-version version major) > .github/VERSION
+          echo VERSION=$(cat .github/VERSION)
+        elif [[ "$minor_count" -ne 0 ]]; then
+          echo setting minor version + 1
+          echo $(npm --no-git-tag-version version minor) > .github/VERSION
+          echo VERSION=$(cat .github/VERSION)
+        else 
+          echo setting patch version + 1
+          echo $(npm --no-git-tag-version version patch) > .github/VERSION
+          echo VERSION=$(cat .github/VERSION)
+        fi
+
+    - name: Stage the changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m "Set version to $(cat .github/VERSION)" -a
+
+    - name: Push Version Change Back to Branch
+      run: |
+        echo Pushing to branch ${GITHUB_REF##*/}
+        git push -u origin ${GITHUB_REF##*/}
+
+    - name: Publish Package
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -14,7 +14,8 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "build": "rimraf dist && npx tsc"
+    "build": "rimraf dist && npx tsc",
+    "prepare": "npm run build"
   },
   "author": "Zachary Heil",
   "license": "ISC",
