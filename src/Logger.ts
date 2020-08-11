@@ -20,6 +20,7 @@ export default class Logger implements LoggerStructure {
         this.name = name;
         this.properties = {};
         this.level = LogLevel[`${process.env.LOG_LEVEL!.toLowerCase()}` as unknown as LogLevel] as unknown as LogLevel || 1;
+        this.streams = [];
 
         this.requestId = typeof (process.env.AWS_REQUEST_ID) === "string" ? process.env.AWS_REQUEST_ID : "UNUSED";
         this.firstFive = [];
@@ -163,7 +164,9 @@ export default class Logger implements LoggerStructure {
             if (this.lastFive.length >= 5) {
                 this.lastFive.shift()
             }
-            this.lastFive.push(nonCircularEvent);
+            if (this.logCount > 5) {
+                this.lastFive.push(nonCircularEvent);
+            }
         }
 
         return event;
