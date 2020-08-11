@@ -80,7 +80,7 @@ export default class Logger implements LoggerStructure {
             }
         }
 
-        const event = this.packageLogEvent(level, message, args);
+        const event = this.packageLogEvent(level, message, ...args);
 
         // If this is above the level threshold, broadcast the message to a stream
         if (level >= this.level) { this.formatter.format(event, this.streams) };
@@ -138,12 +138,19 @@ export default class Logger implements LoggerStructure {
         };
 
         if (this.requestId !== "UNUSED") {
-            let nonCircularEvent = event;
-            delete nonCircularEvent.firstFive;
-            delete nonCircularEvent.lastFive;
+            let nonCircularEvent = {
+                name: this.name,
+                timestamp: new Date().getTime(),
+                level: level,
+                message: {
+                    formatString: message,
+                    args: args
+                },
+                properties: this.properties,
+                stack: level >= LogLevel.warn ? this.getStack() : undefined,
+            };
 
             if (this.firstFive.length < 5) {
-
                 this.firstFive.push(nonCircularEvent);
             }
             if (this.lastFive.length >= 5) {
