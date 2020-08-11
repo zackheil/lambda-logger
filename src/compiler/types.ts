@@ -54,11 +54,11 @@ export type LogEvent = {
         formatString: LogMessage;
         args: any[];
     };
-    stack?: StackTrace[];
     properties: LogProperties;
+    logCount: number;
+    stack?: StackTrace[];
     firstFive?: LogEvent[];
     lastFive?: LogEvent[];
-    logCount: number;
 }
 
 export interface OutputStream {

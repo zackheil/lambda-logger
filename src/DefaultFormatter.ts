@@ -8,16 +8,16 @@ export default class LogFormatter implements LogFormatterStructure {
 
             // Output the log event info to a stream
             output.write(`[${event.timestamp} - ${LogLevel[event.level].toUpperCase()}]: ${format(event.message.formatString, ...event.message.args)}\n`);
-            output.write("\tError: logging the first 5 and last 5 log message to aid in issue replication:\n");
-            if (event.firstFive) {
+            if (event.firstFive && event.level > LogLevel.info) {
+                output.write(`\t${LogLevel[event.level].toUpperCase()}: Printing the first and last 5 log message to aid in issue reproduction:\n`);
                 event.firstFive.forEach(msg => {
-                    output.write(`\tLOG #${msg.logCount}: [${msg.timestamp} - ${LogLevel[msg.level].toUpperCase()}] - ${format(msg.message.formatString, ...msg.message.args)}\n`);
+                    output.write(`\tLOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}\n`);
                 });
             }
-            if (event.lastFive) {
-                output.write("\t[...]\n");
+            if (event.lastFive && event.level > LogLevel.info) {
+                output.write(`\t[... ${event.logCount - 5} more messages ...]\n`);
                 event.lastFive.forEach(msg => {
-                    output.write(`\tLOG #${msg.logCount}: [${msg.timestamp} - ${LogLevel[msg.level].toUpperCase()}] - ${format(msg.message.formatString, ...msg.message.args)}\n`);
+                    output.write(`\tLOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}\n`);
                 });
             }
         }
