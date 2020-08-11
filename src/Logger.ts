@@ -14,6 +14,7 @@ export default class Logger implements LoggerStructure {
     private firstFive: LogEvent[];
     private lastFive: LogEvent[];
     private requestId: string;
+    private logCount: number;
 
     constructor(name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, overrideDefaults?: Boolean) {
         this.name = name;
@@ -23,6 +24,7 @@ export default class Logger implements LoggerStructure {
         this.requestId = typeof (process.env.AWS_REQUEST_ID) === "string" ? process.env.AWS_REQUEST_ID : "UNUSED";
         this.firstFive = [];
         this.lastFive = [];
+        this.logCount = 0;
 
         if (!overrideDefaults) {
             this.formatter = new DefaultFormatter();
@@ -70,6 +72,8 @@ export default class Logger implements LoggerStructure {
             throw new Error(err);
         }
 
+        this.logCount++;
+
         // Update some global info
         if (this.requestId !== "UNUSED") {
             // If this is a new AWS Request ID, then reset the first and last logs
@@ -77,6 +81,7 @@ export default class Logger implements LoggerStructure {
                 this.firstFive = [];
                 this.lastFive = [];
                 this.requestId = process.env.AWS_REQUEST_ID!;
+                this.logCount = 1;
             }
         }
 
@@ -132,9 +137,10 @@ export default class Logger implements LoggerStructure {
                 args: args
             },
             properties: this.properties,
-            stack: this.getStack(),
+            stack: level >= LogLevel.warn ? this.getStack() : undefined,
             firstFive: level >= LogLevel.warn ? this.firstFive : undefined,
             lastFive: level >= LogLevel.warn ? this.lastFive : undefined,
+            logCount: this.logCount
         };
 
         if (this.requestId !== "UNUSED") {
@@ -148,6 +154,7 @@ export default class Logger implements LoggerStructure {
                 },
                 properties: this.properties,
                 stack: level >= LogLevel.warn ? this.getStack() : undefined,
+                logCount: this.logCount
             };
 
             if (this.firstFive.length < 5) {
