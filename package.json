@@ -17,7 +17,7 @@
     "prep": "rimraf node_modules && npm install",
     "build": "rimraf dist && npx tsc",
     "prepare": "npm run build",
-    "test": "echo \"No tests available\""
+    "test": "echo \"No test suite available\""
   },
   "author": "Zachary Heil",
   "license": "ISC",

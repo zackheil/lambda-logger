@@ -4,9 +4,9 @@ on:
   push:
     branches: development
     paths:
-    - '**.ts'
-    - '**.js'
-    - '**.json'
+      - "**.ts"
+      - "**.js"
+      - "**.json"
 
 jobs:
   verify-build:
@@ -16,48 +16,49 @@ jobs:
       matrix:
         node-version: [8.x, 10.x, 12.x]
     steps:
-    # Checkout the code
-    - name: Checkout Branch
-      uses: actions/checkout@v2
-    - name: Install Dependencies for Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm run prep
-    - name: Build Package
-      run: npm run build --if-present
+      # Checkout the code
+      - name: Checkout Branch
+        uses: actions/checkout@v2
+      - name: Install Dependencies for Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm run prep
+      - name: Build Package
+        run: npm run build --if-present
 
   create-version:
     name: Create and Release Pre-release Package Version
     needs: verify-build
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Branch
-      uses: actions/checkout@v2
+      - name: Checkout Branch
+        uses: actions/checkout@v2
 
-    - name: Setup Node
-      uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-        registry-url: 'https://npm.pkg.github.com'
-        scope: 'zackheil'
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "zackheil"
 
-    - name: Establish Version
-      shell: bash
-      run: |
-        echo $(npm --no-git-tag-version version prerelease --preid=${GITHUB_SHA::8}) > .github/VERSION
-        echo VERSION=$(cat .github/VERSION)
-    - name: Stage the changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git commit -m "Set version to $(cat .github/VERSION)" -a
-    - name: Push Version Change Back to Branch
-      run: |
-        echo Pushing to branch ${GITHUB_REF##*/}
-        git push -u origin ${GITHUB_REF##*/}
-    - name: Publish Prerelease Package
-      run: npm run prep
-      run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+      - name: Establish Version
+        shell: bash
+        run: |
+          echo $(npm --no-git-tag-version version prerelease --preid=${GITHUB_SHA::8}) > .github/VERSION
+          echo VERSION=$(cat .github/VERSION)
+      - name: Stage the changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Set version to $(cat .github/VERSION)" -a
+      - name: Push Version Change Back to Branch
+        run: |
+          echo Pushing to branch ${GITHUB_REF##*/}
+          git push -u origin ${GITHUB_REF##*/}
+      - name: Publish Prerelease Package
+        run: |
+          npm run prep
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
