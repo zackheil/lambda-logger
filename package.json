@@ -1,6 +1,6 @@
 {
   "name": "@zackheil/lambda-logger",
-  "version": "0.0.8-b1767a1b.0",
+  "version": "0.0.8-69382081.0",
   "description": "A versatile logger class for NodeJS Lambda functions in AWS",
   "main": "dist/index.js",
   "files": [
