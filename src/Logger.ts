@@ -32,7 +32,7 @@ export default class Logger implements LoggerStructure {
             }];
         }
 
-        // TODO ? 
+        // TODO ?
         // if (this.level = LogLevel.trace) { this.trace("Notice: LAMBDA COLD START"); }
 
     }
