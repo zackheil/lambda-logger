@@ -14,7 +14,7 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "prep": "rimraf node_modules && npm install",
+    "prep": "npm install",
     "build": "rimraf dist && npx tsc",
     "prepare": "npm run build",
     "test": "echo \"No test suite available\""
