@@ -58,6 +58,7 @@ export type LogEvent = {
     properties: LogProperties;
     firstFive?: LogEvent[];
     lastFive?: LogEvent[];
+    logCount: number;
 }
 
 export interface OutputStream {
