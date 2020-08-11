@@ -138,13 +138,18 @@ export default class Logger implements LoggerStructure {
         };
 
         if (this.requestId !== "UNUSED") {
+            let nonCircularEvent = event;
+            delete nonCircularEvent.firstFive;
+            delete nonCircularEvent.lastFive;
+
             if (this.firstFive.length < 5) {
-                this.firstFive.push(event);
+
+                this.firstFive.push(nonCircularEvent);
             }
             if (this.lastFive.length >= 5) {
                 this.lastFive.shift()
             }
-            this.lastFive.push(event);
+            this.lastFive.push(nonCircularEvent);
         }
 
         return event;
