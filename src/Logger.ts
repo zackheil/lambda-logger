@@ -18,7 +18,7 @@ export default class Logger implements LoggerStructure {
     constructor(name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, overrideDefaults?: Boolean) {
         this.name = name;
         this.properties = {};
-        this.level = LogLevel[`${process.env.LOG_LEVEL}` as unknown as LogLevel] as unknown as LogLevel || 1;
+        this.level = LogLevel[`${process.env.LOG_LEVEL!.toLowerCase()}` as unknown as LogLevel] as unknown as LogLevel || 1;
 
         this.requestId = typeof (process.env.AWS_REQUEST_ID) === "string" ? process.env.AWS_REQUEST_ID : "UNUSED";
         this.firstFive = [];
