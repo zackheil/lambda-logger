@@ -57,6 +57,7 @@ jobs:
         echo Pushing to branch ${GITHUB_REF##*/}
         git push -u origin ${GITHUB_REF##*/}
     - name: Publish Prerelease Package
+      run: npm run prep
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
