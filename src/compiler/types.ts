@@ -1,5 +1,3 @@
-
-
 export interface LoggerStructure {
     trace(message: string | object | Error, ...args: any[]): void;
     debug(message: string | object | Error, ...args: any[]): void;
@@ -15,7 +13,6 @@ export interface LoggerStructure {
     setFormatter(formatter: LogFormatterStructure): LoggerStructure;
     addStream(stream: Stream): LoggerStructure;
 };
-
 
 export interface LogFormatterStructure {
     format(event: LogEvent, outStream: any): void;
@@ -53,9 +50,14 @@ export type LogEvent = {
     name: string;
     timestamp: number;
     level: LogLevel;
-    message: LogMessage;
-    stack: StackTrace[];
+    message: {
+        formatString: LogMessage;
+        args: any[];
+    };
+    stack?: StackTrace[];
     properties: LogProperties;
+    firstFive?: LogEvent[];
+    lastFive?: LogEvent[];
 }
 
 export interface OutputStream {
