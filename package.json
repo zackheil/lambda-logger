@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "rimraf dist && npx tsc",
-    "prepare": "npm run build"
+    "prepare": "npm ci && npm run build"
   },
   "author": "Zachary Heil",
   "license": "ISC",
