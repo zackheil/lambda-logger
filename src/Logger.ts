@@ -3,7 +3,8 @@ import DefaultFormatter from "./DefaultFormatter";
 
 // TODO: -convert to Object.prototype structure instead of using a class for +20x perf boost
 //       -setup a benchmark to test my logger with Pino and Bunyan   
-
+//       -logger off mode
+//       -requestId is forced into unused if defined globally. Fix this
 export default class Logger implements LoggerStructure {
     private level: LogLevel;
     private formatter: LogFormatterStructure | undefined;
@@ -83,16 +84,14 @@ export default class Logger implements LoggerStructure {
     }
 
     public child(properties: object): Logger {
+        let name;
+        Object.keys(properties).includes("name") ? name = (properties as any).name : name = this.name;
 
-        // let name;
-        // Object.keys(properties).includes("name") ? name = (properties as any).name : name = this.name;
+        let child = new Logger(name, true);
 
-        // let child = new Logger(name, true);
-
-        // // Having the child have custom streams might be a good future feature
-        // child.formatter = this.formatter;
-        // child.streams = this.streams;
-        // child.properties = this.properties;
+        child.formatter = this.formatter;
+        child.streams = this.streams;
+        child.properties = this.properties;
 
         for (let [key, value] of Object.entries(properties))
             this.addLogProperty(key, value);
