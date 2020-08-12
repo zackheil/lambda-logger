@@ -15,7 +15,7 @@ export default class LogFormatter implements LogFormatterStructure {
                 });
             }
             if (event.lastFive && event.level > LogLevel.info) {
-                if (event.logCount > 10)
+                if (event.logCount > 11)
                     output.write(`\t[... ${event.logCount - 11} more messages ...]\n`);
                 event.lastFive.forEach(msg => {
                     output.write(`\tLOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}\n`);
