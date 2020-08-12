@@ -4,7 +4,6 @@ import DefaultFormatter from "./DefaultFormatter";
 // TODO: convert to Object.prototype instead of using a class for +20x perf boost
 
 export default class Logger implements LoggerStructure {
-    private name: string;
     private level: LogLevel;
     private formatter: LogFormatterStructure | undefined;
     private streams: Stream[] | undefined;
@@ -16,10 +15,10 @@ export default class Logger implements LoggerStructure {
     private requestId: string;
     private logCount: number;
 
-    constructor(name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, overrideDefaults?: Boolean) {
-        this.name = name;
+    constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, overrideDefaults?: Boolean) {
+
+        this.level = this.getLogLevel();
         this.properties = {};
-        this.level = LogLevel[`${process.env.LOG_LEVEL!.toLowerCase()}` as unknown as LogLevel] as unknown as LogLevel || 1;
         this.streams = [];
 
         this.requestId = typeof (process.env.AWS_REQUEST_ID) === "string" ? process.env.AWS_REQUEST_ID : "UNUSED";
@@ -40,6 +39,7 @@ export default class Logger implements LoggerStructure {
 
     }
 
+    //#region public methods
     public trace(message: LogMessage, ...args: any[]): void {
         this.log(LogLevel.trace, message, ...args);
     }
@@ -90,6 +90,9 @@ export default class Logger implements LoggerStructure {
 
         // If this is above the level threshold, broadcast the message to a stream
         if (level >= this.level) { this.formatter.format(event, this.streams) };
+
+        // Add the message to the debugging stream 
+        this.addToBuffer(level, message, ...args);
     }
 
     // TODO Refactor or remove this functionality
@@ -127,9 +130,22 @@ export default class Logger implements LoggerStructure {
         this.removeLogProperty(key);
         return result;
     }
+    //#endregion public methods
+
+    //#region private utility methods
+    private getLogLevel(): LogLevel {
+        // Set the log level (default level of 'info')
+        if (typeof (process.env.LOG_LEVEL) === "undefined") { return LogLevel.info; }
+
+        let lvl = process.env.LOG_LEVEL.toLowerCase();
+        let lvls = ["trace", "debug", "info", "warn", "error", "fatal"];
+        if (!lvls.includes(lvl)) { return LogLevel.info; }
+
+        return LogLevel[`${process.env.LOG_LEVEL!.toLowerCase()}` as unknown as LogLevel] as unknown as LogLevel;
+    }
 
     private packageLogEvent(level: LogLevel, message: LogMessage, ...args: any[]): LogEvent {
-        let event = {
+        return {
             name: this.name,
             timestamp: new Date().getTime(),
             level: level,
@@ -143,7 +159,9 @@ export default class Logger implements LoggerStructure {
             lastFive: level >= LogLevel.warn ? this.lastFive : undefined,
             logCount: this.logCount
         };
+    }
 
+    private addToBuffer(level: LogLevel, message: LogMessage, ...args: any[]): void {
         if (this.requestId !== "UNUSED") {
             let nonCircularEvent = {
                 name: this.name,
@@ -168,8 +186,6 @@ export default class Logger implements LoggerStructure {
                 this.lastFive.push(nonCircularEvent);
             }
         }
-
-        return event;
     }
 
     // TODO: maybe only enable this on warn and higher ... or trace only?
@@ -196,7 +212,9 @@ export default class Logger implements LoggerStructure {
         }
         return packagedStack;
     }
+    //#endregion private utility methods
 
+    //#region public class-level utility methods
     public setFormatter(formatter: LogFormatterStructure): LoggerStructure {
         this.formatter = formatter;
         return this;
@@ -206,4 +224,5 @@ export default class Logger implements LoggerStructure {
         this.streams?.push(stream);
         return this;
     }
+    //#endregion public utility methods
 }
