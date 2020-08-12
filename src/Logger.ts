@@ -8,35 +8,24 @@ export default class Logger implements LoggerStructure {
     private formatter: LogFormatterStructure | undefined;
     private streams: Stream[] | undefined;
     private properties: LogProperties;
-
-    // TODO: will need to do testing if moving array values is more expensive than 5 vars
     private firstFive: LogEvent[];
     private lastFive: LogEvent[];
     private requestId: string;
     private logCount: number;
 
-    constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, overrideDefaults?: Boolean) {
+    constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, noStdOutStream?: Boolean) {
 
         this.level = this.getLogLevel();
         this.properties = {};
-        this.streams = [];
-
+        this.streams = noStdOutStream ? [] : [{
+            outputStream: process.stdout,
+            errorStream: process.stderr
+        }];
+        this.formatter = new DefaultFormatter();
         this.requestId = typeof (process.env.AWS_REQUEST_ID) === "string" ? process.env.AWS_REQUEST_ID : "UNUSED";
         this.firstFive = [];
         this.lastFive = [];
-        this.logCount = 0;
-
-        if (!overrideDefaults) {
-            this.formatter = new DefaultFormatter();
-            this.streams = [{
-                outputStream: process.stdout,
-                errorStream: process.stderr
-            }];
-        }
-
-        // TODO ?
-        // if (this.level = LogLevel.trace) { this.trace("Notice: LAMBDA COLD START"); }
-
+        this.logCount = 1;
     }
 
     //#region public methods
@@ -66,14 +55,9 @@ export default class Logger implements LoggerStructure {
 
     public log(level: LogLevel, message: LogMessage, ...args: any[]): void {
         // Make sure we have somewhere to send this message
-        if (!this.formatter || !this.streams) {
-            const err = `The following weren't defined in the logger: ${this.formatter ? "" : "[formatter] "}` +
-                `${this.streams ? "" : "[streams]"}. If you are going to override the defaults, you must use ` +
-                `the appropriate method to set them.`
-            throw new Error(err);
+        if (this.streams === []) {
+            throw new Error("There were no defined output streams and the default stream set was overridden!");
         }
-
-        this.logCount++;
 
         // Update some global info
         if (this.requestId !== "UNUSED") {
@@ -89,10 +73,13 @@ export default class Logger implements LoggerStructure {
         const event = this.packageLogEvent(level, message, ...args);
 
         // If this is above the level threshold, broadcast the message to a stream
-        if (level >= this.level) { this.formatter.format(event, this.streams) };
+        if (level >= this.level) { this.formatter!.format(event, this.streams) };
 
         // Add the message to the debugging stream 
-        this.addToBuffer(level, message, ...args);
+        if (this.requestId !== "UNUSED") {
+            this.addToBuffer(level, message, ...args);
+            this.logCount++;
+        }
     }
 
     // TODO Refactor or remove this functionality
@@ -162,29 +149,27 @@ export default class Logger implements LoggerStructure {
     }
 
     private addToBuffer(level: LogLevel, message: LogMessage, ...args: any[]): void {
-        if (this.requestId !== "UNUSED") {
-            let nonCircularEvent = {
-                name: this.name,
-                timestamp: new Date().getTime(),
-                level: level,
-                message: {
-                    formatString: message,
-                    args: args
-                },
-                properties: this.properties,
-                stack: level >= LogLevel.warn ? this.getStack() : undefined,
-                logCount: this.logCount
-            };
+        let nonCircularEvent = {
+            name: this.name,
+            timestamp: new Date().getTime(),
+            level: level,
+            message: {
+                formatString: message,
+                args: args
+            },
+            properties: this.properties,
+            stack: level >= LogLevel.warn ? this.getStack() : undefined,
+            logCount: this.logCount
+        };
 
-            if (this.firstFive.length < 5) {
-                this.firstFive.push(nonCircularEvent);
-            }
-            if (this.lastFive.length >= 5) {
-                this.lastFive.shift()
-            }
-            if (this.logCount > 5) {
-                this.lastFive.push(nonCircularEvent);
-            }
+        if (this.firstFive.length < 5) {
+            this.firstFive.push(nonCircularEvent);
+        }
+        if (this.lastFive.length >= 5) {
+            this.lastFive.shift()
+        }
+        if (this.logCount > 5) {
+            this.lastFive.push(nonCircularEvent);
         }
     }
 
@@ -221,7 +206,7 @@ export default class Logger implements LoggerStructure {
     }
 
     public addStream(stream: Stream): LoggerStructure {
-        this.streams?.push(stream);
+        this.streams!.push(stream);
         return this;
     }
     //#endregion public utility methods
