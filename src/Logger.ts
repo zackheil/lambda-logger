@@ -1,7 +1,8 @@
 import { LoggerStructure, LogFormatterStructure, LogEvent, LogLevel, LogMessage, StackTrace, Stream, LogProperties } from "./compiler/types"
 import DefaultFormatter from "./DefaultFormatter";
 
-// TODO: convert to Object.prototype instead of using a class for +20x perf boost
+// TODO: -convert to Object.prototype structure instead of using a class for +20x perf boost
+//       -setup a benchmark to test my logger with Pino and Bunyan   
 
 export default class Logger implements LoggerStructure {
     private level: LogLevel;
@@ -14,7 +15,6 @@ export default class Logger implements LoggerStructure {
     private logCount: number;
 
     constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, noStdOutStream?: Boolean) {
-
         this.level = this.getLogLevel();
         this.properties = {};
         this.streams = noStdOutStream ? [] : [{
@@ -77,29 +77,27 @@ export default class Logger implements LoggerStructure {
 
         // Add the message to the debugging stream 
         if (this.requestId !== "UNUSED") {
-            this.addToBuffer(level, message, ...args);
+            this.addToBuffer(event);
             this.logCount++;
         }
     }
 
-    // TODO Refactor or remove this functionality
     public child(properties: object): Logger {
 
-        let name;
-        Object.keys(properties).includes("name") ? name = (properties as any).name : name = this.name;
+        // let name;
+        // Object.keys(properties).includes("name") ? name = (properties as any).name : name = this.name;
 
-        let child = new Logger(name, true);
+        // let child = new Logger(name, true);
 
-        // Having the child have custom streams might be a good future feature
-        child.formatter = this.formatter;
-        child.streams = this.streams;
-        child.properties = this.properties;
+        // // Having the child have custom streams might be a good future feature
+        // child.formatter = this.formatter;
+        // child.streams = this.streams;
+        // child.properties = this.properties;
 
         for (let [key, value] of Object.entries(properties))
-            child.addLogProperty(key, value);
-        delete child.properties.name;
+            this.addLogProperty(key, value);
 
-        return child;
+        return this;
     }
 
     public addLogProperty(key: string, value: any) {
@@ -144,22 +142,25 @@ export default class Logger implements LoggerStructure {
             stack: level >= LogLevel.warn ? this.getStack() : undefined,
             firstFive: level >= LogLevel.warn ? this.firstFive : undefined,
             lastFive: level >= LogLevel.warn ? this.lastFive : undefined,
-            logCount: this.logCount
+            logCount: this.logCount,
+            requestId: this.requestId,
         };
     }
 
-    private addToBuffer(level: LogLevel, message: LogMessage, ...args: any[]): void {
+    private addToBuffer(event: LogEvent): void {
+        // purposefully omitting the first and last 5 for circular JSON reasons
         let nonCircularEvent = {
-            name: this.name,
-            timestamp: new Date().getTime(),
-            level: level,
+            name: event.name,
+            timestamp: event.timestamp,
+            level: event.level,
             message: {
-                formatString: message,
-                args: args
+                formatString: event.message.formatString,
+                args: event.message.args
             },
-            properties: this.properties,
-            stack: level >= LogLevel.warn ? this.getStack() : undefined,
-            logCount: this.logCount
+            properties: event.properties,
+            stack: event.stack,
+            logCount: event.logCount,
+            requestId: event.requestId,
         };
 
         if (this.firstFive.length < 5) {

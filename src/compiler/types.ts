@@ -56,6 +56,7 @@ export type LogEvent = {
     };
     properties: LogProperties;
     logCount: number;
+    requestId: string;
     stack?: StackTrace[];
     firstFive?: LogEvent[];
     lastFive?: LogEvent[];
