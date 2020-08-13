@@ -14,6 +14,12 @@ export interface LoggerStructure {
     addStream(stream: Stream): LoggerStructure;
 };
 
+export interface BufferStructure {
+    add(event: LogEvent): void;
+    getLogs(): LogEvent[];
+    getCount(): number;
+}
+
 export interface LogFormatterStructure {
     format(event: LogEvent, outStream: any): void;
 };
@@ -24,7 +30,8 @@ export enum LogLevel {
     info,
     warn,
     error,
-    fatal
+    fatal,
+    off
 };
 
 export type LogMessage = string | object | Error;
@@ -55,8 +62,8 @@ export type LogEvent = {
         args: any[];
     };
     properties: LogProperties;
-    logCount: number;
-    requestId: string;
+    logCount?: number;
+    requestId?: string;
     stack?: StackTrace[];
     firstFive?: LogEvent[];
     lastFive?: LogEvent[];

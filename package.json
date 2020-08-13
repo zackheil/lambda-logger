@@ -1,7 +1,7 @@
 {
   "name": "@zackheil/lambda-logger",
   "version": "0.0.8-da9e725a.0",
-  "description": "A versatile logger class for NodeJS Lambda functions in AWS",
+  "description": "A versatile logger class for the NodeJS AWS Lambda runtime",
   "main": "dist/index.js",
   "files": [
     "dist/**"
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/node": "^14.0.27",
     "rimraf": "^3.0.2",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1"
   }
 }
