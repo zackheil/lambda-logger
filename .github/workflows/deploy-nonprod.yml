@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - development
-      - feature/*
+      - feature-*
     paths:
       - "**.ts"
       - "**.js"

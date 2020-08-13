@@ -13,6 +13,7 @@ export default class Logger implements LoggerStructure {
     private properties: LogProperties;
     private requestId: string | undefined;
 
+
     constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, noStdOutStream?: Boolean) {
         if (this.getLevel() === LogLevel.off) {
             this.level = 6;
