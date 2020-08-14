@@ -71,14 +71,11 @@ export default class JSONFormatter implements LogFormatterStructure {
         if (process.env.IS_OFFLINE) { output.write("\n"); }
     }
 
-    localIndent(output: OutputStream): void {
-        if (process.env.IS_OFFLINE) { output.write("  "); }
-    }
-
-    // Though stringify is slow, this is necessary in some cases. 
-    stringify(i: any): string {
-        if (process.env.IS_OFFLINE) { return JSON.stringify(i, null, 4); }
-        return JSON.stringify(i);
+    localIndent(output: OutputStream, spaces: number = 2): void {
+        if (process.env.IS_OFFLINE) {
+            for (let i = 0; i < spaces; i++)
+                output.write(" ");
+        }
     }
 
     addProperties(event: LogEvent, output: OutputStream): void {
@@ -99,17 +96,30 @@ export default class JSONFormatter implements LogFormatterStructure {
     }
 
     addStoredLogs(event: LogEvent, output: OutputStream): void {
-        let first: Array<string> = [];
-        let last: Array<string> = [];
+        output.write(",");
+        this.localNewLine(output);
+        this.localIndent(output);
+        output.write("PreviousLogs:[");
 
+        let first = true;
         event.buffer!.firstLogs.forEach(msg => {
-            first.push(`\tLOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}\n`);
+            if (!first) { output.write(","); }
+            this.localNewLine(output);
+            this.localIndent(output, 4);
+            output.write(`"LOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}"`);
+            first = false;
         });
 
+        first = true;
         event.buffer!.lastLogs.forEach(msg => {
-            last.push(`\tLOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}\n`);
+            if (!first) { output.write(","); }
+            this.localNewLine(output);
+            this.localIndent(output, 4);
+            output.write(`"LOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}"`);
+            first = false;
         });
-
-        this.stringify({ PreviousLogs: (new Array()).concat(first, last) });
+        this.localNewLine(output);
+        this.localIndent(output)
+        output.write("]");
     }
 }
