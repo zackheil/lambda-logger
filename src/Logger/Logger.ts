@@ -175,7 +175,9 @@ export default class Logger implements LoggerStructure {
         child.formatter = this.formatter;
         child.streams = this.streams;
         child.logBuffer = this.logBuffer;
-        child.properties = this.properties;
+
+        for (let [key, value] of Object.entries(this.properties))
+            child.addLogProperty(key, value);
 
         for (let [key, value] of Object.entries(properties))
             child.addLogProperty(key, value);
