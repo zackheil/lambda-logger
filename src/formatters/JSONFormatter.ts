@@ -57,7 +57,7 @@ export default class JSONFormatter implements LogFormatterStructure {
 
             // Close the log object
             this.localNewLine(output);
-            output.write("{");
+            output.write("}\n");
         }
     }
 
