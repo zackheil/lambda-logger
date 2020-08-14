@@ -134,8 +134,9 @@ export default class Logger implements LoggerStructure {
         }
 
         // In case the logger was defined globally in a handler file, check for reqId again:
-        if (process.env.AWS_REQUEST_ID && !this.logBuffer) {
-            this.logBuffer = new RequestBuffer();
+        if (process.env.AWS_REQUEST_ID) {
+            this.requestId = process.env.AWS_REQUEST_ID;
+            if (!this.logBuffer) { this.logBuffer = new RequestBuffer() };
         }
 
         const event = this.packageLogEvent(level, message, ...args);
@@ -179,7 +180,7 @@ export default class Logger implements LoggerStructure {
         for (let [key, value] of Object.entries(properties))
             this.addLogProperty(key, value);
 
-        return this;
+        return child;
     }
 
     /**

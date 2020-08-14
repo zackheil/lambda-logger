@@ -30,7 +30,7 @@ export default class JSONFormatter implements LogFormatterStructure {
             if (typeof (event.message.formatString) === "string") {
                 output.write(",");
                 this.localNewLine(output);
-                const hash = crypto.createHash('md5').update(event.message.formatString as string).digest("hex");
+                const hash = crypto.createHash('md5').update(event.message.formatString as string).digest("hex").substr(0, 8).toUpperCase();
                 this.writeKVPair("MessageHash", hash, output);
             }
 
@@ -46,6 +46,7 @@ export default class JSONFormatter implements LogFormatterStructure {
             }
 
             // Add misc log properties as root level attributes
+            this.addProperties(event, output);
 
             // Add debug helping info
             if (event.buffer && event.level > LogLevel.info) {
@@ -71,7 +72,7 @@ export default class JSONFormatter implements LogFormatterStructure {
     }
 
     localIndent(output: OutputStream): void {
-        if (process.env.IS_OFFLINE) { output.write("\t"); }
+        if (process.env.IS_OFFLINE) { output.write("  "); }
     }
 
     // Though stringify is slow, this is necessary in some cases. 
@@ -84,10 +85,16 @@ export default class JSONFormatter implements LogFormatterStructure {
         if (Object.keys(event.properties).length === 0) { return; }
 
         for (let [key, value] of Object.entries(event.properties)) {
-            if (typeof (value) === "string")
+            if (typeof (value) === "string") {
+                output.write(",");
+                this.localNewLine(output);
                 this.writeKVPair(key, value, output);
-            else
-                this.writeKVPair(key, this.stringify(value), output); // probably fix later on. I see issues with objects
+            }
+            else {
+                output.write(",");
+                this.localNewLine(output);
+                this.writeKVPair(key, JSON.stringify(value), output); // probably fix later on. I see issues with objects
+            }
         }
     }
 
