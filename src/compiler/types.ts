@@ -16,7 +16,7 @@ export interface LoggerStructure {
 
 export interface BufferStructure {
     add(event: LogEvent): void;
-    getLogs(): LogEvent[];
+    getLogs(): SavedLogs;
     getCount(): number;
 }
 
@@ -62,11 +62,16 @@ export type LogEvent = {
         args: any[];
     };
     properties: LogProperties;
-    logCount?: number;
     requestId?: string;
     stack?: StackTrace[];
-    firstFive?: LogEvent[];
-    lastFive?: LogEvent[];
+    buffer?: SavedLogs;
+    logCount?: number;
+}
+
+export type SavedLogs = {
+    firstLogs: LogEvent[];
+    lastLogs: LogEvent[];
+    bufferSize: number;
 }
 
 export interface OutputStream {

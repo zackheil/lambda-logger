@@ -1,12 +1,9 @@
-import { LoggerStructure, LogLevel, LogFormatterStructure, Stream, LogProperties } from "./compiler/types";
+import { LoggerStructure, LogLevel, LogFormatterStructure, Stream } from "./compiler/types";
 
 export default class DeadLogger implements LoggerStructure {
-
-    constructor() {
-    }
     trace(message: string | object | Error, ...args: any[]): void { return; }
     debug(message: string | object | Error, ...args: any[]): void { return; }
-    info(message: string | object | Error, ...args: any[]): void { process.stdout.write("yay"); return; }
+    info(message: string | object | Error, ...args: any[]): void { return; }
     warn(message: string | object | Error, ...args: any[]): void { return; }
     error(message: string | object | Error, ...args: any[]): void { return; }
     fatal(message: string | object | Error, ...args: any[]): void { return; }
@@ -17,8 +14,4 @@ export default class DeadLogger implements LoggerStructure {
     attachPropertyScope(key: string, property: string | object, cb: () => any) { return; }
     setFormatter(formatter: LogFormatterStructure): LoggerStructure { return this; }
     addStream(stream: Stream): LoggerStructure { return this; }
-    getLevel() { return; }
-    packageLogEvent() { return; }
-    addToBuffer() { return; }
-    getStack() { return; }
 }

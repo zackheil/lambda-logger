@@ -1,6 +1,17 @@
-import { LoggerStructure, LogFormatterStructure, LogEvent, LogLevel, LogMessage, StackTrace, Stream, LogProperties } from "./compiler/types"
+import {
+    LoggerStructure,
+    LogFormatterStructure,
+    LogEvent,
+    LogLevel,
+    LogMessage,
+    StackTrace,
+    Stream,
+    LogProperties,
+    BufferStructure
+} from "./compiler/types"
 import DefaultFormatter from "./DefaultFormatter";
 import DeadLogger from "./DeadLogger";
+import RequestBuffer from "./RequestBuffer";
 
 // TODO: -convert to Object.prototype structure instead of using a class for perf boost
 //       -setup a benchmark to test my logger with Pino and Bunyan   
@@ -12,22 +23,24 @@ export default class Logger implements LoggerStructure {
     private streams: Stream[] | undefined;
     private properties: LogProperties;
     private requestId: string | undefined;
+    private logBuffer: BufferStructure | undefined;
 
-
-    constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, noStdOutStream?: Boolean) {
+    constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, noStdOut?: Boolean) {
+        // The following method for disabling the logger works because Lambda
+        // performs a cold start whenever env variables are changed.
         if (this.getLevel() === LogLevel.off) {
             this.level = 6;
             this.formatter = undefined;
             this.streams = undefined;
             this.properties = {};
             this.requestId = undefined;
-            process.stdout.write("Logger: RETURNING A DEADLOGGER()")
             return new DeadLogger() as unknown as Logger;
         }
 
         this.level = this.getLevel();
+        this.logBuffer = process.env.AWS_REQUEST_ID ? new RequestBuffer() : undefined;
         this.properties = {};
-        this.streams = noStdOutStream ? [] : [{ outputStream: process.stdout, errorStream: process.stderr }];
+        this.streams = noStdOut ? [] : [{ outputStream: process.stdout, errorStream: process.stderr }];
         this.formatter = new DefaultFormatter();
     }
 
@@ -62,7 +75,14 @@ export default class Logger implements LoggerStructure {
             throw new Error("There were no defined output streams and the default stream set was overridden!");
         }
 
+        // In case the logger was defined globally in a handler file, check for reqId again:
+        if (process.env.AWS_REQUEST_ID && !this.logBuffer) {
+            this.logBuffer = new RequestBuffer();
+        }
+
+        // Package and save the log event to the buffer (if applicable)
         const event = this.packageLogEvent(level, message, ...args);
+        if (this.logBuffer) { this.logBuffer.add(event); }
 
         // If this is above the level threshold, broadcast the message to a stream
         if (level >= this.level) { this.formatter!.format(event, this.streams) };
@@ -76,6 +96,7 @@ export default class Logger implements LoggerStructure {
 
         child.formatter = this.formatter;
         child.streams = this.streams;
+        child.logBuffer = this.logBuffer;
         child.properties = this.properties;
 
         for (let [key, value] of Object.entries(properties))
@@ -116,36 +137,19 @@ export default class Logger implements LoggerStructure {
     private packageLogEvent(level: LogLevel, message: LogMessage, ...args: any[]): LogEvent {
         return {
             name: this.name,
-            timestamp: new Date().getTime(),
+            timestamp: Date.now(),
             level: level,
             message: {
                 formatString: message,
                 args: args
             },
             properties: this.properties,
-            stack: level >= LogLevel.warn ? this.getStack() : undefined,
             requestId: this.requestId,
+            stack: level >= LogLevel.warn ? this.getStack() : undefined,
+            buffer: this.logBuffer ? this.logBuffer.getLogs() : undefined,
+            logCount: this.logBuffer ? this.logBuffer.getCount() : undefined,
         };
     }
-
-    // private addToBuffer(event: LogEvent): void {
-    //     // purposefully omitting the first and last 5 for circular JSON reasons
-    //     let nonCircularEvent = {
-    //         name: event.name,
-    //         timestamp: event.timestamp,
-    //         level: event.level,
-    //         message: {
-    //             formatString: event.message.formatString,
-    //             args: event.message.args
-    //         },
-    //         properties: event.properties,
-    //         stack: event.stack,
-    //         logCount: event.logCount,
-    //         requestId: event.requestId,
-    //     };
-
-
-    // }
 
     // TODO: maybe only enable this on warn and higher ... or trace only?
     private getStack(): StackTrace[] {

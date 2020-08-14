@@ -1,4 +1,4 @@
-import { BufferStructure, LogEvent } from "./compiler/types";
+import { BufferStructure, LogEvent, SavedLogs } from "./compiler/types";
 
 export default class RequestBuffer implements BufferStructure {
     private count: number;
@@ -7,12 +7,12 @@ export default class RequestBuffer implements BufferStructure {
     private lastLogs: LogEvent[];
     constructor(private bufferSize: number = 5) {
         // this.requestId = typeof (process.env.AWS_REQUEST_ID) === "string" ? process.env.AWS_REQUEST_ID : "UNUSED";
-        this.count = 0;
+        this.count = 1;
         this.firstLogs = [];
         this.lastLogs = [];
     }
 
-    add(event: LogEvent): void {
+    public add(event: LogEvent): void {
         this.count++;
 
         const e: LogEvent = {
@@ -21,7 +21,8 @@ export default class RequestBuffer implements BufferStructure {
             level: event.level,
             message: event.message,
             properties: event.properties,
-            logCount: this.count,
+            stack: event.stack,
+            logCount: event.logCount,
             requestId: event.requestId
         };
 
@@ -37,11 +38,15 @@ export default class RequestBuffer implements BufferStructure {
         }
     }
 
-    getLogs(): LogEvent[] {
-        return [];
+    public getLogs(): SavedLogs {
+        return {
+            firstLogs: this.firstLogs,
+            lastLogs: this.lastLogs,
+            bufferSize: this.bufferSize
+        };
     }
 
-    getCount(): number {
+    public getCount(): number {
         return this.count;
     }
 }
