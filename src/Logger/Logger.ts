@@ -178,7 +178,8 @@ export default class Logger implements LoggerStructure {
         child.properties = this.properties;
 
         for (let [key, value] of Object.entries(properties))
-            this.addLogProperty(key, value);
+            child.addLogProperty(key, value);
+        delete child.properties.name;
 
         return child;
     }
