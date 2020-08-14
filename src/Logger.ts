@@ -80,12 +80,13 @@ export default class Logger implements LoggerStructure {
             this.logBuffer = new RequestBuffer();
         }
 
-        // Package and save the log event to the buffer (if applicable)
         const event = this.packageLogEvent(level, message, ...args);
-        if (this.logBuffer) { this.logBuffer.add(event); }
 
         // If this is above the level threshold, broadcast the message to a stream
         if (level >= this.level) { this.formatter!.format(event, this.streams) };
+
+        // Save the log event to the buffer (if applicable) after sending the message
+        if (this.logBuffer) { this.logBuffer.add(event); }
     }
 
     public child(properties: object): Logger {
@@ -146,8 +147,8 @@ export default class Logger implements LoggerStructure {
             properties: this.properties,
             requestId: this.requestId,
             stack: level >= LogLevel.warn ? this.getStack() : undefined,
-            buffer: this.logBuffer ? this.logBuffer.getLogs() : undefined,
-            logCount: this.logBuffer ? this.logBuffer.getCount() : undefined,
+            buffer: this.logBuffer && level >= LogLevel.warn ? this.logBuffer.getLogs() : undefined,
+            logCount: this.logBuffer ? this.logBuffer.getCount() + 1 : undefined,
         };
     }
 
