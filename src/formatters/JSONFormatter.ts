@@ -50,8 +50,6 @@ export default class JSONFormatter implements LogFormatterStructure {
 
             // Add debug helping info
             if (event.buffer && event.level > LogLevel.info) {
-                output.write(",");
-                this.localNewLine(output);
                 this.addStoredLogs(event, output);
             }
 
@@ -99,7 +97,7 @@ export default class JSONFormatter implements LogFormatterStructure {
         output.write(",");
         this.localNewLine(output);
         this.localIndent(output);
-        output.write("PreviousLogs:[");
+        output.write(`"PreviousLogs":[`);
 
         let first = true;
         event.buffer!.firstLogs.forEach(msg => {
@@ -109,10 +107,8 @@ export default class JSONFormatter implements LogFormatterStructure {
             output.write(`"LOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}"`);
             first = false;
         });
-
-        first = true;
         event.buffer!.lastLogs.forEach(msg => {
-            if (!first) { output.write(","); }
+            output.write(",");
             this.localNewLine(output);
             this.localIndent(output, 4);
             output.write(`"LOG #${msg.logCount}: [${LogLevel[msg.level].toUpperCase()}]: ${format(msg.message.formatString, ...msg.message.args)}"`);
