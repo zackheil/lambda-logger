@@ -33,6 +33,7 @@ export default class Logger implements LoggerStructure {
     private properties: LogProperties;
     private requestId: string | undefined;
     private logBuffer: BufferStructure | undefined;
+    private parent: Logger | undefined;
 
     constructor(private name: string = process.env.AWS_LAMBDA_FUNCTION_NAME!, noStdOut?: Boolean) {
         // The following method for disabling the logger works because Lambda
@@ -136,7 +137,12 @@ export default class Logger implements LoggerStructure {
         // In case the logger was defined globally in a handler file, check for reqId again:
         if (process.env.AWS_REQUEST_ID) {
             this.requestId = process.env.AWS_REQUEST_ID;
-            if (!this.logBuffer) { this.logBuffer = new RequestBuffer() };
+            if (!this.logBuffer) {
+                if (this.parent)
+                    this.logBuffer = this.parent.logBuffer;
+                else
+                    this.logBuffer = new RequestBuffer();
+            };
         }
 
         const event = this.packageLogEvent(level, message, ...args);
@@ -146,7 +152,6 @@ export default class Logger implements LoggerStructure {
 
         // Save the log event to the buffer (if applicable) after sending the message
         if (this.logBuffer) { this.logBuffer.add(event); }
-        this.log
     }
 
     /**
@@ -175,6 +180,7 @@ export default class Logger implements LoggerStructure {
         child.formatter = this.formatter;
         child.streams = this.streams;
         child.logBuffer = this.logBuffer;
+        child.parent = this;
 
         for (let [key, value] of Object.entries(this.properties))
             child.addLogProperty(key, value);
