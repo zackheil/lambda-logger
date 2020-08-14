@@ -1,4 +1,4 @@
-import { BufferStructure, LogEvent, SavedLogs } from "./compiler/types";
+import { BufferStructure, LogEvent, SavedLogs } from "../compiler/types";
 
 export default class RequestBuffer implements BufferStructure {
     private count: number;

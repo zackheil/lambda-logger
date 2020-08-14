@@ -7,11 +7,13 @@ export interface LoggerStructure {
     fatal(message: string | object | Error, ...args: any[]): void;
     log(level: LogLevel, message: LogMessage, ...args: any[]): void;
     child(properties: object): LoggerStructure;
-    addLogProperty(key: string, value: any): void;
+    addLogProperty(key: string, value: string | object): void;
     removeLogProperty(key: string): void;
-    attachPropertyScope(key: string, property: string | object, cb: () => any): any;
+    scope(key: string, property: string | object, fn: () => any): any;
+    asyncScope(key: string, property: string | object, fn: () => Promise<any>): Promise<Boolean>;
     setFormatter(formatter: LogFormatterStructure): LoggerStructure;
     addStream(stream: Stream): LoggerStructure;
+    mask(input: string | number | undefined): string;
 };
 
 export interface BufferStructure {
@@ -45,6 +47,7 @@ export type StackTrace = {
 };
 
 export type Stream = {
+    name: string;
     outputStream: OutputStream;
     errorStream: OutputStream;
 };

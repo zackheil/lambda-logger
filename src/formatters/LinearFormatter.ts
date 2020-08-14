@@ -1,7 +1,7 @@
-import { LogFormatterStructure, LogEvent, Stream, LogLevel } from "./compiler/types";
+import { LogFormatterStructure, LogEvent, Stream, LogLevel } from "../compiler/types";
 import { format } from "util";
 
-export default class LogFormatter implements LogFormatterStructure {
+export default class LinearFormatter implements LogFormatterStructure {
     format(event: LogEvent, outputStreams: Stream[]) {
         for (const s of outputStreams) {
             const output = event.level >= 3 ? s.errorStream : s.outputStream;
