@@ -4,6 +4,13 @@ Lambda-logger is a versatile logging class specialized for AWS Lambda’s NodeJS
 
 Please note that this is an incomplete readme file, so if you somehow have stumbled across this, just know it is still being worked on and will have more complete documentation in the future.
 
+### Install:
+
+```sh
+echo "@zackheil:registry=https://npm.pkg.github.com/" > .npmrc; #or add quoted text to .npmrc yourself
+npm i @zackheil/lambda-logger
+```
+
 # Table of Contents
 
 _coming soon_
@@ -25,7 +32,7 @@ Bare-bones usage: This creates a logger with a default level of 'info', does not
 
 ```js
 import Logger from "@zackheil/lambda-logger";
-const log = new Logger();
+const log = new Logger(); // You can optionally set a name with Logger("This is my name");
 log.info("this is a log message");
 ```
 
@@ -130,3 +137,23 @@ and a compact one on AWS:
 ### Creating a Custom Formatter
 
 To create a custom formatter, reference the existing formatters in the source code for examples and inspiration and utilize the types: `LogEvent`, `LogFormatterStructure`, and `Stream`.
+
+# Adding/Editing Streams
+
+By default, the logger will default to `stdout`/`stderr` as mentioned above, but if you want to add a custom output location, you can using the `addStream(stream: Stream)` method off of the constructor. This _appends_ the log stream you add to the existing stream of `stdout`/`stderr`. If you would like to remove the default `stdout`/`stderr` stream, use the second arg of the Logger constructor (override stdout) set to `true` :
+
+```js
+const log1 = new Logger("MyLogger", true);
+log1.info("message"); // will error as no output is now defined.
+
+// Create a custom stream defined by the "Stream" type
+myCustomStream = {
+  name: "my stream",
+  outputStream: fs.createWriteStream("program.log"),
+  errorStream: fs.createWriteStream("program_errors.log"),
+  // you can make errorStream the same to have a unified log location
+};
+const log2 = new Logger("MyWorkingLogger", true).addStream(myCustomStream);
+log2.info("message"); // will be written to program.log
+log2.error("error"); // will be written to program_errors.log
+```
