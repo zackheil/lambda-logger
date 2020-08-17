@@ -143,7 +143,7 @@ To create a custom formatter, reference the existing formatters in the source co
 By default, the logger will default to `stdout`/`stderr` as mentioned above, but if you want to add a custom output location, you can using the `addStream(stream: Stream)` method off of the constructor. This _appends_ the log stream you add to the existing stream of `stdout`/`stderr`. If you would like to remove the default `stdout`/`stderr` stream, use the second arg of the Logger constructor (override stdout) set to `true` :
 
 ```js
-const log1 = new Logger("MyLogger", true);
+const log1 = new Logger("MyBrokenLogger", true);
 log1.info("message"); // will error as no output is now defined.
 
 // Create a custom stream defined by the "Stream" type
@@ -151,7 +151,7 @@ myCustomStream = {
   name: "my stream",
   outputStream: fs.createWriteStream("program.log"),
   errorStream: fs.createWriteStream("program_errors.log"),
-  // you can make errorStream the same to have a unified log location
+  // you can make errorStream the same as outputStream for unified logs
 };
 const log2 = new Logger("MyWorkingLogger", true).addStream(myCustomStream);
 log2.info("message"); // will be written to program.log
