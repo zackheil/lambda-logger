@@ -11,20 +11,17 @@ echo "@zackheil:registry=https://npm.pkg.github.com/" > .npmrc; #or add quoted t
 npm i @zackheil/lambda-logger
 ```
 
-# Table of Contents
-
-_coming soon_
-
-- Features
-- Basic Usage
-- Log Levels
-- Output Streams
-- Formatter Objects
-- Suggestions for Best Performance
-
 # Features
 
-_coming soon... keep scrolling for usage_
+- Global log level assignment via the environment variable LOG_LEVEL.
+- Serverless and Serverless-offline plugin support.
+- Multiple output stream support separated by a “standard” output and an “error” output.
+- A property object store to selectively add attributes to log messages.
+- User-defined output formatters that can be minimalistic for high performance or verbose and complex for advanced process monitoring.
+- A buffer of logs that keeps track of the first and last few logs for a particular AWS Request ID to pinpoint where errors occur and the inputs that were used to reproduce it.
+- The ability to mask message contents with a hash for parameters that are deemed sensitive
+- Typescript support.
+- Absolute minimal overhead “off” mode.
 
 # Basic Usage
 
@@ -38,7 +35,7 @@ log.info("this is a log message");
 
 ## Setting Log Level
 
-Building off of this, let's set a log level. A large portion of AWS deployments are using the Serverless framework. To set the log level globally for the entire application distribution, add the following parameter to the `serverless.yml` file. _If not using serverless or a CloudFormation type service, go into each Lmabda that utilizes the logger and add an environment variable to the function using the function's configuration and settings page_.
+Building off of this, let's set a log level. A large portion of AWS deployments are using the Serverless framework. To set the log level globally for the entire application distribution, add the following parameter to the `serverless.yml` file. _If not using serverless or a CloudFormation type service, go into each Lambda that utilizes the logger and add an environment variable to the function using the function's configuration and settings page_.
 
 ```yml
 # <log level> = trace | debug | info | warn | error | fatal | off
@@ -157,3 +154,7 @@ const log2 = new Logger("MyWorkingLogger", true).addStream(myCustomStream);
 log2.info("message"); // will be written to program.log
 log2.error("error"); // will be written to program_errors.log
 ```
+
+# Future Work
+
+- (minor change) will re-write using prototypes for a boost in performance
