@@ -1,10 +1,10 @@
-### Summary
+# Summary
 
 Lambda-logger is a versatile logging class specialized for AWS Lambda’s NodeJS runtime. It is loosely inspired by the .NET logger Serilog with user-defined structured logging in mind.
 
 Please note that this is an incomplete readme file, so if you somehow have stumbled across this, just know it is still being worked on and will have more complete documentation in the future.
 
-### Table of Contents
+# Table of Contents
 
 _coming soon_
 
@@ -15,9 +15,11 @@ _coming soon_
 - Formatter Objects
 - Suggestions for Best Performance
 
-### Features
+# Features
 
-### Basic Usage
+_coming soon... keep scrolling for usage_
+
+# Basic Usage
 
 Bare-bones usage: This creates a logger with a default level of 'info', does not collect a history of logs linked back to the AWS Request ID, and sends the info logs to `stdout` where 'warn', 'error', and 'fatal' to `stderr`.
 
@@ -27,6 +29,8 @@ const log = new Logger();
 log.info("this is a log message");
 ```
 
+## Setting Log Level
+
 Building off of this, let's set a log level. A large portion of AWS deployments are using the Serverless framework. To set the log level globally for the entire application distribution, add the following parameter to the `serverless.yml` file. _If not using serverless or a CloudFormation type service, go into each Lmabda that utilizes the logger and add an environment variable to the function using the function's configuration and settings page_.
 
 ```yml
@@ -35,6 +39,8 @@ provider:
   environment:
     LOG_LEVEL: <log level>
 ```
+
+## Creating a Log Buffer
 
 If you would like to sacrifice a small bit of performance for the sake of increased error debugging, the logger looks to see if a value is set for the environment variable `process.env.AWS_REQUEST_ID` and will keep track of the first five logs and the most recent 5 logs for a given request identifier. These stored logs will be echoed back to you for any 'warn', 'error', or 'fatal' message that the program comes across. To enable the functionality, set the process variable at the beginning of your handler:
 
@@ -88,5 +94,39 @@ Example output:
         LOG #10: [DEBUG]: Another log related to execution 7
         LOG #11: [INFO]: Another log related to execution 8
         LOG #12: [INFO]: Another log related to execution 9
-
 ```
+
+## Structuring Logs
+
+By default, the logs are written in a basic, linear structure. This can be changed by setting a formatter at time of construction. You can either use the preinstalled formatters, or create your own with Typescript.
+
+### Using a Preinstalled Formatter
+
+```js
+import Logger, { JSONFormatter } from "@zackheil/lambda-logger";
+const log = new Logger().setFormatter(new JSONFormatter());
+export async thisIsMyAwsHandler(event, context) {
+    process.env.AWS_REQUEST_ID = context.awsRequestId; // enables log tracking
+    log.info("this log will be formatted in JSON");
+    return{/* (...) */}
+}
+
+/*
+This will log a pretty-printed json to stdout locally (via serverless-offline),
+and a compact one on AWS:
+
+{
+  "Timestamp":"1597686887997",
+  "Level":"INFO",
+  "Message":"this log will be formatted in JSON",
+  "MessageHash":"052B46F2",
+  "RequestId":"ckdytisl100023zybbddl9ubm",
+  "LogCount":"1"
+}
+
+*/
+```
+
+### Creating a Custom Formatter
+
+To create a custom formatter, reference the existing formatters in the source code for examples and inspiration and utilize the types: `LogEvent`, `LogFormatterStructure`, and `Stream`.
