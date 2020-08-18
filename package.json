@@ -1,7 +1,7 @@
 {
   "name": "@zackheil/lambda-logger",
-  "version": "0.0.7",
-  "description": "A versatile logger class for NodeJS Lambda functions in AWS",
+  "version": "0.0.8-a3e89ea5.0",
+  "description": "A versatile logger class for the NodeJS AWS Lambda runtime",
   "main": "dist/index.js",
   "files": [
     "dist/**"
@@ -14,14 +14,17 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
+    "prep": "npm install",
     "build": "rimraf dist && npx tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "echo \"No test suite available\""
   },
   "author": "Zachary Heil",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^14.0.27",
     "rimraf": "^3.0.2",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.1"
   }
 }
