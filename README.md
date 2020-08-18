@@ -25,7 +25,7 @@ npm i @zackheil/lambda-logger
 
 # Basic Usage
 
-Bare-bones usage: This creates a logger with a default level of 'info', does not collect a history of logs linked back to the AWS Request ID, and sends the info logs to `stdout` where 'warn', 'error', and 'fatal' to `stderr`.
+Bare-bones usage: This creates a logger with a default level of 'info', does not collect a history of logs linked back to the AWS Request ID, and sends the info logs to `stdout` where 'warn', 'error', and 'fatal' go to `stderr`.
 
 ```js
 import Logger from "@zackheil/lambda-logger";
@@ -39,7 +39,7 @@ log.info("this %s a log %s", "is", "message");
 
 ## Setting Log Level
 
-Building off of this, let's set a log level. A large portion of AWS deployments are using the Serverless framework. To set the log level globally for the entire application distribution, add the following parameter to the `serverless.yml` file. _If not using serverless or a CloudFormation type service, go into each Lambda that utilizes the logger and add an environment variable to the function using the function's configuration and settings page_.
+Building off of this, let's set a log level. A large portion of AWS deployments are using the Serverless framework. To set the log level globally for the entire application distribution, add the following parameter to the `serverless.yml` file. _If not using Serverless or a CloudFormation type service, go into each Lambda that utilizes the logger and add an environment variable to the function using the function's configuration and settings page_.
 
 ```yml
 # <log level> = trace | debug | info | warn | error | fatal | off
@@ -104,11 +104,13 @@ Example output:
         LOG #12: [INFO]: Another log related to execution 9
 ```
 
+Notice in the above console output that output logs are set to the level 'info' or higher, but in the case that the buffer is dumped, you have access to all levels of logs and can see the trace and debug messages that would otherwise be hidden.
+
 ## Structuring Logs
 
-By default, the logs are written in a basic, linear structure. This can be changed by setting a formatter at time of construction. You can either use the pre-installed formatters, or create your own with the supplied Typescript definitions.
+By default, the logs are written in a basic line structure. This can be changed by setting a formatter at time of construction. You can either use the pre-installed formatters, or create your own with the supplied Typescript definitions.
 
-### Using a Preinstalled Formatter
+### Using a Pre-installed Formatter
 
 ```js
 import Logger, { JSONFormatter } from "@zackheil/lambda-logger";
@@ -137,7 +139,7 @@ and a compact one on AWS:
 
 ### Creating a Custom Formatter
 
-To create a custom formatter, reference the existing formatters in the source code for examples and inspiration and utilize the types: `LogEvent`, `LogFormatterStructure`, and `Stream`.
+To create a custom formatter, reference the existing formatters in the source code for examples and inspiration and utilize the types: `LogEvent`, `LogFormatterStructure`, and `Stream`. [Example line format code](https://github.com/zackheil/lambda-logger/blob/master/src/formatters/LinearFormatter.ts)
 
 # Adding/Editing Streams
 
@@ -218,6 +220,7 @@ for(let i = 0; i < 20; i++) {
 
 ### Misc work:
 
+- finish this readme to read more like documentation with a TOC
 - (no feature change) The speed changes detailed above
 - (no feature change) Modify the buffer to save resources (store the log method args, not events)
 - (no feature change) unit testing
