@@ -87,6 +87,8 @@ jobs:
         git push -u origin ${GITHUB_REF##*/}
 
     - name: Publish Package
-      run: npm publish
+      run: |
+          npm run prep 
+          npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
