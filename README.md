@@ -2,7 +2,7 @@
 
 Lambda-logger is a versatile logging class specialized for AWS Lambda’s NodeJS runtime. It is loosely inspired by the .NET logger Serilog with user-defined structured logging in mind, as well as the node-bunyan logger.
 
-Please note that this is an incomplete readme file, so if you somehow have stumbled across this, just know it is still being worked on and will have more complete documentation in the future. In the meantime, the information below is documentation by demonstration and a working example can be cloned from the example repository [here](https://github.com/zackheil)
+Please note that this is an incomplete readme file, so if you somehow have stumbled across this, just know it is still being worked on and will have more complete documentation in the future. In the meantime, the information below is documentation by demonstration and **a working example can be cloned from the example repository** [here](https://github.com/zackheil/lambda-logger-example)
 
 ### Install:
 
