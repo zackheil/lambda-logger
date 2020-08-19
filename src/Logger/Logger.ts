@@ -345,9 +345,9 @@ export default class Logger implements LoggerStructure {
      * // Logs: Got card number [<private:masked> hash:'fd03204cfdc557b0f0d134773ae6fff5'] from DB
      */
     public mask(input: string | number | undefined): string {
-        if (!input) { return `<private:undefined>`; }
+        if (typeof (input) === "undefined") { return `<private:undefined>`; }
+        if (typeof (input) === "string" && input.length === 0) { return `<private:empty string>`; }
         if (typeof (input) === "number") { input = String(input); }
-        if (input.length === 0) { return `<private:empty string>`; }
         const md5 = crypto.createHash('md5').update(input).digest("hex");
         return `<private:masked> hash:'${md5}'`
     }
