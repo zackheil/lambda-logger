@@ -9,7 +9,7 @@ import {
     LogProperties,
     BufferStructure
 } from "../compiler/types"
-import LinearFormatter from "../formatters/LinearFormatter";
+import LinearFormatter from "./formatters/LinearFormatter";
 import DeadLogger from "./DeadLogger";
 import RequestBuffer from "./RequestBuffer";
 import crypto from "crypto";

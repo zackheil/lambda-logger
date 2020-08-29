@@ -1,4 +1,4 @@
-import { LogFormatterStructure, LogEvent, Stream, LogLevel, OutputStream } from "../compiler/types";
+import { LogFormatterStructure, LogEvent, Stream, LogLevel, OutputStream } from "../../compiler/types";
 import { format } from "util";
 import crypto from "crypto";
 

@@ -1,4 +1,4 @@
-import { LogFormatterStructure, LogEvent, Stream, LogLevel } from "../compiler/types";
+import { LogFormatterStructure, LogEvent, Stream, LogLevel } from "../../compiler/types";
 import { format } from "util";
 
 export default class LinearFormatter implements LogFormatterStructure {

@@ -7,7 +7,8 @@ Please note that this is an incomplete readme file, so if you somehow have stumb
 ### Install:
 
 ```sh
-echo "@zackheil:registry=https://npm.pkg.github.com/" > .npmrc; #or add quoted text to .npmrc yourself
+echo "@zackheil:registry=https://npm.pkg.github.com/" > .npmrc; 
+#      ^ or add quoted text to .npmrc yourself
 npm i @zackheil/lambda-logger
 ```
 
